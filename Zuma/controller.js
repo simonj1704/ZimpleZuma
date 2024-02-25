@@ -1,13 +1,14 @@
 "use strict";
 
-import Model from "../model/Model.js";
-import View from "../view/View.js";
+import Model from "./LinkedList.js";
+import View from "./View.js";
 
 window.addEventListener("load", start);
 
 function start() {
     console.log("JS is running");
-
+    let controller = new Controller();
+    controller.start();
 }
 
 
@@ -31,6 +32,7 @@ export default class Controller{
         this.createBalls();
         this.displayBalls(this.model);
         this.getCannonBall();
+        this.newestIndex = null;
     }
 
     shootBall(index){
@@ -47,12 +49,11 @@ export default class Controller{
         let inBall = this.model.get(index+1).data;
         this.view.insertNewBallAfter(index, inBall)
 
-        setTimeout(() => {
-            this.checkforMatches(this.model.get(index+1));
-        }, 1200);
+        this.newestIndex = index+1;
     }
 
-    checkforMatches(index){
+    checkforMatches(){
+        let index = this.model.get(this.newestIndex)
         let matches = this.model.findMatchesAround(index);
         if (matches.length >= 3){
             this.removeMatches(matches);
@@ -60,14 +61,26 @@ export default class Controller{
         }
     }
 
+    checkMoreMatches(){
+        console.log(this.model.moreMatches)
+        if(this.model.moreMatches == null){
+            return;
+        }
+        let matches = this.model.findMatchesAround(this.model.moreMatches);
+        if (matches.length >= 3){
+            this.removeMatches(matches);
+        }
+    }
+
     removeMatches(matches){
+        setTimeout(() => {
         for (let index = 0; index < matches.length; index++) {
             this.view.animateBallToDisappear(this.view.ballChain[matches[index]]);
             
         }
-        setTimeout(() => {
-        this.displayBalls(this.model);
-        }, 700);
+        }, 1);
+        
+        
     }
 
     createBalls(){
